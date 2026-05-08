@@ -1,10 +1,4 @@
-/*
-📌 GETTERS Y SETTERS EN JAVASCRIPT
-
-Los getters y setters nos permiten controlar cómo se accede
-y cómo se modifica una propiedad de un objeto.
-
-👉 Esto forma parte del encapsulamiento:
+ma parte del encapsulamiento:
 proteger datos y evitar cambios incorrectos.
 */
 
@@ -125,60 +119,3 @@ try {
    console.log(item2.price);
    console.log(item2.describe());
 }
-
-/*
-========================================================
-📌 GETTERS Y SETTERS CON VALIDACIÓN DE EDAD
-========================================================
-
-En este ejemplo, usamos un setter para controlar que la edad solo pueda aumentar.
-*/
-
-class Person {
-   constructor(name, age) {
-      this.name = name;
-
-      if (!Number.isFinite(age) || age < 0) {
-         throw new Error("Edad inicial inválida");
-      }
-
-      this._age = age;
-   }
-
-   set age(value) {
-      if (Number.isFinite(value) && value > this._age) {
-         this._age = value;
-         console.log(`Felicidades por cumplir ${value} años!`);
-      } else {
-         throw new Error(
-            "La edad debe ser un número mayor que la edad actual. La gente no puede rejuvenecer...",
-         );
-      }
-   }
-
-   get age() {
-      return this._age;
-   }
-
-   greet() {
-      return `Hola, mi nombre es ${this.name}`;
-   }
-}
-
-const user = new Person("Alex Jacobson", 29);
-
-try {
-   user.age = 28;
-} catch (error) {
-   console.log("Error: " + error.message);
-}
-
-console.log(user.age);
-
-try {
-   user.age = 30;
-} catch (error) {
-   console.log("Error: " + error.message);
-}
-
-console.log(user.age);

@@ -119,3 +119,152 @@ Orientada a Objetos (POO):
 - depositar, retirar, transferir y aplicar intereses funcionan correctamente
 - Se manejan errores correctamente (saldo insuficiente, password inválida)
 */
+
+class Account {
+   #password;
+   constructor(owner, balance = 0, password, blocked = false) {
+      this.owner = owner;
+      this._balance = balance;
+      this.password = password; // Usamos el setter para validar
+      this.blocked = blocked;
+      this.counter = 0; // Contador de intentos de contraseña
+      this.transactions = new Transaction(); // Historial de transacciones
+   }
+
+   deposit(amount) {
+      this._balance += amount;
+      this.transactions.addTransaction("deposit", amount);
+   }
+
+   withdraw(amount) {
+      if (amount > this._balance || this.blocked) {
+         return false;
+      } else {
+         this._balance -= amount;
+         this.transactions.addTransaction("withdraw", amount);
+         return true;
+      }
+   }
+   get balance() {
+      return this._balance;
+   }
+   set password(newPassword) {
+      if (typeof newPassword === "string" && newPassword.length >= 6) {
+         this.#password = newPassword;
+      } else {
+         console.log("La contraseña debe tener al menos 6 caracteres.");
+      }
+   }
+
+   checkPassword(password) {
+      if (this.blocked) {
+         return false;
+      }
+      if (this.#password !== password) {
+         this.counter++;
+         if (this.counter >= 3) {
+            this.blocked = true;
+         }
+         return false;
+      }
+      return true;
+   }
+}
+
+class SavingsAccount extends Account {
+   constructor(owner, balance = 0, password, interestRate) {
+      super(owner, balance, password);
+      this.interestRate = interestRate;
+   }
+
+   applyInterest() {
+      this._balance += this._balance * this.interestRate;
+   }
+}
+
+class CurrentAccount extends Account {
+   constructor(owner, balance = 0, password, overdraftLimit) {
+      super(owner, balance, password);
+      this.overdraftLimit = overdraftLimit;
+   }
+
+   withdraw(amount) {
+      if (amount > this._balance + this.overdraftLimit) {
+         return false;
+      } else {
+         return super.withdraw(amount);
+      }
+   }
+}
+
+class Bank {
+   constructor() {
+      this.accounts = [];
+   }
+   addAccount(account) {
+      this.accounts.push(account);
+   }
+
+   findAccountByOwner(name) {
+      return this.accounts.find((account) => account.owner === name);
+   }
+
+   transfer(from, to, amount, password) {
+      const fromAccount = this.findAccountByOwner(from);
+      const toAccount = this.findAccountByOwner(to);
+      if (fromAccount && toAccount && fromAccount.checkPassword(password)) {
+         if (fromAccount.withdraw(amount)) {
+            toAccount.deposit(amount);
+            console.log(
+               `Transferencia de ${amount} de ${from} a ${to} realizada con éxito.`,
+            );
+         } else {
+            console.log("Saldo insuficiente para la transferencia.");
+         }
+      } else {
+         console.log("Transferencia fallida. Verifique los detalles.");
+      }
+   }
+
+   static bankInfo() {
+      return "Banco Ficticio - Fundado en 2024";
+   }
+}
+
+class Transaction {
+   constructor() {
+      this.transactions = [];
+   }
+
+   addTransaction(type, amount) {
+      this.transactions.push({ type, amount, date: new Date() });
+   }
+
+   getStatement() {
+      return this.transactions.map(
+         (t) => `${t.date.toLocaleString()}: ${t.type} de ${t.amount}`,
+      );
+   }
+}
+
+// Ejemplo de uso
+const Bank_A = new Bank();
+
+const savings = new SavingsAccount("Alice", 1000, "password123", 0.05);
+const current = new CurrentAccount("Bob", 500, "secure456", 200);
+
+Bank_A.addAccount(savings);
+Bank_A.addAccount(current);
+
+savings.applyInterest();
+console.log(`Saldo de Alice después de aplicar interés: ${savings.balance}`);
+
+console.log(`Saldo de Alice: ${savings.balance}`);
+console.log(`Saldo de Bob: ${current.balance}`);
+Bank_A.transfer("Alice", "Bob", 200, "password123");
+console.log(`Saldo de Alice: ${savings.balance}`);
+console.log(`Saldo de Bob: ${current.balance}`);
+
+console.log(Bank.bankInfo());
+
+console.log(current.transactions.getStatement());

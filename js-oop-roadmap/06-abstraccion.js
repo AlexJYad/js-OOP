@@ -23,22 +23,24 @@ Ejemplo de la vida real:
 */
 
 class Shape {
-  // Método que debe ser implementado por cualquier subclase
-  area() {
-    throw new Error("El método area() debe ser implementado por la subclase.");
-  }
+   // Método que debe ser implementado por cualquier subclase
+   area() {
+      throw new Error(
+         "El método area() debe ser implementado por la subclase.",
+      );
+   }
 }
 
 // Cualquier clase que herede de Shape debe sobrescribir area()
 class Square extends Shape {
-  constructor(side) {
-    super();
-    this.side = side;
-  }
+   constructor(side) {
+      super();
+      this.side = side;
+   }
 
-  area() {
-    return this.side * this.side;
-  }
+   area() {
+      return this.side * this.side;
+   }
 }
 
 // Ejemplo de uso

@@ -32,18 +32,19 @@ greet()
 */
 
 class Person {
-    constructor(name, age) {
-        this.name = name;
-        this.age = age;
-    }
+   constructor(name, age) {
+      this.name = name;
+      this.age = age;
+   }
 
-    greet() {
-        return `Hola, mi nombre es ${this.name}`;
-    }
+   greet() {
+      return `Hola, mi nombre es ${this.name}`;
+   }
 }
 
 // Creamos un objeto (una instancia) a partir de la clase Person
-const user = new Person('Kauan Rodrigues', 17);
+const user = new Person("Kauan Rodrigues", 17);
+const user2 = new Person("Alex Jacobson", 29);
 
 console.log(user.greet());
-
+console.log(user2.greet());

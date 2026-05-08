@@ -1,62 +1,7 @@
-/*
-📌 HERENCIA Y POLIMORFISMO EN JAVASCRIPT
-
-Herencia:
-Permite que una clase "hija" reutilice atributos y métodos de una clase "padre",
-evitando repetir código y facilitando mantenimiento y extensión del programa.
-
-Polimorfismo:
-Permite que un mismo método se comporte diferente según la clase que lo implemente.
-*/
-
-class Animal {
-   constructor(name) {
-      this.name = name;
-   }
-
-   speak() {
-      return `${this.name} hace un sonido.`;
-   }
-}
-
-class Dog extends Animal {
-   // Polimorfismo: modificamos el método speak para Dog
-   speak() {
-      return `${this.name} ladra.`;
-   }
-}
-
-class Cat extends Animal {
-   constructor(name, breed) {
-      super(name); // Llama al constructor de la clase padre (Animal)
-      this.breed = breed;
-   }
-
-   // Polimorfismo: sobrescribimos speak pero podemos usar super para mantener parte del comportamiento original
-   speak() {
-      return super.speak(); // Usa el método speak de Animal
-   }
-}
-
-class Rabbit extends Animal {
-   // No define constructor, usa el de la clase padre
-   // No sobrescribe speak(), así que mantiene el comportamiento de Animal
-}
-
-// ==========================
-// Creando y probando los objetos
-
-const dog = new Dog("Rex");
-console.log(dog.speak()); // Rex ladra.
-
-const cat = new Cat("Firulais", "SRD");
-console.log(cat.speak()); // Firulais hace un sonido.
-
-const rabbit = new Rabbit("Conejito");
-console.log(rabbit.speak()); // Conejito hace un sonido.
-
 class Person {
+   static count = 0; // contador de instancias creadas
    #NIE;
+
    constructor(name, age, NIE) {
       this.name = name;
 
@@ -66,6 +11,7 @@ class Person {
 
       this._age = age;
       this.setNIE(NIE);
+      Person.count++; // aumenta cada vez que se crea un nuevo objeto
    }
 
    set age(value) {
@@ -107,24 +53,42 @@ class Person {
    greet() {
       return `Hola, mi nombre es ${this.name}.`;
    }
+   static getCount() {
+      return Person.count;
+   }
+
+   static isAdult(age) {
+      return age >= 18;
+   }
+
+   trabajo() {
+      throw new Error(
+         "El método trabajo() debe ser implementado por la subclase.",
+      );
+   }
 }
 
 class Citizen extends Person {
-   constructor(name, age, NIE, country) {
+   constructor(name, age, NIE, country, work = "desempleador") {
       super(name, age, NIE); // Llama al constructor de Person
       if (typeof country !== "string" || country.length < 2) {
          throw new Error("País no válido");
       }
       this.country = country;
+      this.work = work;
    }
 
    // Polimorfismo: sobrescribimos greet para incluir el país
    greet() {
       return `${super.greet()} Soy de ${this.country}.`;
    }
+
+   trabajo() {
+      return `Trabajo como ${this.work}.`;
+   }
 }
 
-const Alex = new Person("Alex Jacobson", 29, "X1234567A");
+let Alex = new Person("Alex Jacobson", 29, "X1234567A");
 
 console.log(Alex.age);
 console.log(Alex.getMaskedNIE());
@@ -133,6 +97,12 @@ console.log(Alex.getMaskedNIE());
 Alex.checkNIE("Y7654321B") ?
    console.log("NIE correcto")
 :  console.log("NIE incorrecto");
-
-const Inna = new Citizen("Inna", 25, "Z9876543C", "España");
+Alex = new Citizen("Alex Jacobson", 29, "Y7654321B", "España", "programador");
+const Inna = new Citizen("Inna", 25, "Z9876543C", "España", "diseñadora");
 console.log(Inna.greet()); // Hola, mi nombre es Inna. Soy de España.
+console.log(Inna.trabajo());
+console.log(Alex.greet()); // Hola, mi nombre es Alex Jacobson. Soy de España.
+console.log(Alex.trabajo()); // Trabajo como programador.
+
+console.log(`Número de personas creadas: ${Person.getCount()}`); // Número de personas creadas: 2
+console.log(`¿Es Alex adulto? ${Person.isAdult(Alex.age)}`); // ¿Es Alex adulto? true
