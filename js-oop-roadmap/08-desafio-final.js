@@ -119,12 +119,22 @@ Orientada a Objetos (POO):
 - depositar, retirar, transferir y aplicar intereses funcionan correctamente
 - Se manejan errores correctamente (saldo insuficiente, password inválida)
 */
+const BANK_CONFIG = Object.freeze({
+   name: "Banco Ficticio",
+   founded: 2024,
+});
 
 class Account {
    #password;
    constructor(owner, balance = 0, password, blocked = false) {
       this.owner = owner;
-      this._balance = balance;
+      Object.defineProperty(this, "balance", {
+         get: () => this._balance,
+         set: () => {
+            throw new Error("No puedes modificar el balance directamente");
+         },
+         enumerable: true,
+      });
       this.password = password; // Usamos el setter para validar
       this.blocked = blocked;
       this.counter = 0; // Contador de intentos de contraseña
@@ -132,19 +142,27 @@ class Account {
    }
 
    deposit(amount) {
+      if (amount <= 0 || this.blocked) {
+         return false;
+      }
       this._balance += amount;
       this.transactions.addTransaction("deposit", amount);
+      return true;
    }
 
    withdraw(amount) {
       if (amount > this._balance || this.blocked) {
          return false;
-      } else {
-         this._balance -= amount;
-         this.transactions.addTransaction("withdraw", amount);
-         return true;
       }
+      this.withdrawOperation(amount);
+      return true;
    }
+
+   withdrawOperation(amount) {
+      this._balance -= amount;
+      this.transactions.addTransaction("withdraw", amount);
+   }
+
    get balance() {
       return this._balance;
    }
@@ -169,6 +187,10 @@ class Account {
       }
       return true;
    }
+
+   getStatement() {
+      return this.transactions.getStatement();
+   }
 }
 
 class SavingsAccount extends Account {
@@ -178,7 +200,9 @@ class SavingsAccount extends Account {
    }
 
    applyInterest() {
-      this._balance += this._balance * this.interestRate;
+      const amount = this._balance * this.interestRate;
+      this._balance += amount;
+      this.transactions.addTransaction("interest", amount);
    }
 }
 
@@ -192,7 +216,8 @@ class CurrentAccount extends Account {
       if (amount > this._balance + this.overdraftLimit) {
          return false;
       } else {
-         return super.withdraw(amount);
+         super.withdrawOpperation(amount);
+         return true;
       }
    }
 }
@@ -201,6 +226,7 @@ class Bank {
    constructor() {
       this.accounts = [];
    }
+
    addAccount(account) {
       this.accounts.push(account);
    }
@@ -227,7 +253,7 @@ class Bank {
    }
 
    static bankInfo() {
-      return "Banco Ficticio - Fundado en 2024";
+      return `${BANK_CONFIG.name} - Fundado en ${BANK_CONFIG.founded}`;
    }
 }
 
@@ -267,4 +293,4 @@ console.log(`Saldo de Bob: ${current.balance}`);
 
 console.log(Bank.bankInfo());
 
-console.log(current.transactions.getStatement());
+console.log(current.getStatement());
